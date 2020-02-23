@@ -63,7 +63,7 @@ const createKeyperInstance = async () => {
 		frame: false,
 		radii: [5,5,5,5],
 		resizable: true,
-		titleBarStyle:'hiddenInset',
+    titleBarStyle: 'hidden',
 		backgroundColor:"#fff",
 		show,
 		webPreferences:{
@@ -73,7 +73,7 @@ const createKeyperInstance = async () => {
 	});
 
 	loadingWindow = createMainWindow(true, 400, 250);
-	loadingWindow.loadURL(mainUrl(false, 'loading'));
+  loadingWindow.loadURL(mainUrl(false, 'loading'));
 
 	loadingWindow.once('ready-to-show', () => {
 		loadingWindow.show();
@@ -82,6 +82,7 @@ const createKeyperInstance = async () => {
 
   mainWindow = createMainWindow(false);
 	mainWindow.loadURL(mainUrl(false));
+  mainWindow.webContents.openDevTools();
 	loadingWindow.close();
 	loadingWindow = null;
 
