@@ -2,9 +2,11 @@
   "name": "keyper-wallet",
   "version": "1.0.0",
   "description": "A minimal wallet for keyper",
-  "main": "electron.js",
   "scripts": {
-    "start": "electron ."
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "start": "npm run build && electron ./lib/main.js"
   },
   "repository": "https://github.com/ququzone/keyper-scatter",
   "keywords": [
@@ -15,9 +17,11 @@
   "author": "ququzone <xueping.yang@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^8.0.0",
-    "eslint": "^6.0.0",
-    "eslint-config-standard": "^14.0.0",
-    "eslint-plugin-standard": "^4.0.0"
+    "electron": "^8.0.1",
+    "tslint": "^5.19.0",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "electron-store": "^5.1.1"
   }
 }
