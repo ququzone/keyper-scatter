@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Keyper</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../statics/css/photon.min.css">
+  </head>
+  <body style="-webkit-app-region: drag">
+    <div class="window">
+      <div class="window-content">
+        <div class="padded-more">
+          <h1>Create Keyper password</h1>
+          <form>
+            <div class="form-group">
+              <label>Password</label>
+              <input id="password" type="password" class="form-control" placeholder="Password">
+            </div>
+            <button class="btn btn-default" id="create">Create</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script>
+      require("../lib/renderer/create.js");
+    </script>
+  </body>
+</html>
