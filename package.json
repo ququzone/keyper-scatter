@@ -17,8 +17,11 @@
     "electron": "^8.0.1"
   },
   "dependencies": {
-    "bip39": "^3.0.2",
+    "@keyper/container": "0.0.3",
+    "@keyper/specs": "0.0.3",
+    "@nervosnetwork/ckb-sdk-utils": "^0.28.0",
     "electron-store": "^5.1.1",
-    "scrypt-async": "^2.0.1"
+    "elliptic": "^6.5.2",
+    "scrypt.js": "^0.3.0"
   }
 }
