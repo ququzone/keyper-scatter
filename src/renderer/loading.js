@@ -1,6 +1,5 @@
-import { ipcRenderer, remote } from "electron";
+const { ipcRenderer, remote } = require("electron");
 
-// @ts-ignore
 const wallet = remote.getGlobal("wallet");
 
 async function init() {

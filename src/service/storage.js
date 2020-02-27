@@ -1,22 +1,25 @@
-import * as Store from "electron-store";
+const Store = require("electron-store");
 
 const KEYPER_DATA_NAME = "keyper";
 
 const stores = {};
 
-export const getStore = (name: string) => {
+const getStore = (name) => {
   if (!stores.hasOwnProperty(name)) {
-    // @ts-ignore
     stores[name] = new Store({ name});
   }
 
-  // @ts-ignore
   return stores[name];
 };
 
-export const keyperStorage = () => getStore(KEYPER_DATA_NAME);
+const keyperStorage = () => getStore(KEYPER_DATA_NAME);
 
-export const getSalt = () => {
+const getSalt = () => {
   return keyperStorage().get("salt") || "SALT_ME";
 };
 
+module.exports = {
+  getStore,
+  keyperStorage,
+  getSalt,
+};

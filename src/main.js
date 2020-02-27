@@ -1,12 +1,12 @@
-import { app, BrowserWindow, ipcMain } from "electron";
-import * as path from "path";
-import * as wallet from "./service/wallet";
+const { app, BrowserWindow, ipcMain } = require("electron");
+const path = require("path");
+const wallet = require("./service/wallet");
 
 ipcMain.on("newpage", (event, page) => {
   mainWindow.loadFile(path.join(__dirname, `../html/${page}.html`));
 });
 
-let mainWindow: Electron.BrowserWindow;
+let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -14,7 +14,8 @@ function createWindow() {
     width: 1024,
     webPreferences: {
       nodeIntegration: true,
-      preload: path.join(__dirname, "preload.js"),
+      nodeIntegrationInWorker: true,
+      //preload: path.join(__dirname, "preload.js"),
     },
     show: false,
   });

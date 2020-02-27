@@ -1,14 +1,13 @@
-import * as bip39 from "bip39";
-import * as scrypt from "scrypt-async";
-import * as storage from "./storage";
+const scrypt = require("scrypt-async");
+const storage = require("./storage");
 
-let seed: string;
+let seed;
 
-export const init = () => {
+const init = () => {
   // seed = storage.keyperStorage().get("seed");
 };
 
-export const hashPassword = (password: string) => {
+const hashPassword = (password) => {
   return new Promise(async (resolve) => {
     const salt = storage.getSalt();
     scrypt(password, salt, {
@@ -17,37 +16,43 @@ export const hashPassword = (password: string) => {
       p: 1,
       dkLen: 16,
       encoding: "hex",
-    }, (derivedKey: any) => {
+    }, (derivedKey) => {
       resolve(derivedKey);
     });
   });
 };
 
-export const passwordToSeed = async (password: string) => {
+const passwordToSeed = async (password) => {
   const hash = await hashPassword(password);
   return hash;
 };
 
-export const createPassword = async (password: string) => {
-  // @ts-ignore
+const createPassword = async (password) => {
   seed = await passwordToSeed(password);
   storage.keyperStorage().set("seed", seed);
 };
 
-export const getSeed = () => seed;
+const getSeed = () => seed;
 
-export const exists = () => {
+const exists = () => {
   const s = storage.keyperStorage().get("seed");
   return s !== undefined;
 };
 
-export const unlock = async (password: string) => {
+const unlock = async (password) => {
   const hash = await passwordToSeed(password);
   const s = storage.keyperStorage().get("seed");
   if (s === hash) {
-    // @ts-ignore
     seed = hash;
     return true;
   }
   return false;
+};
+
+module.exports = {
+  init,
+  createPassword,
+  getSeed,
+  unlock,
+  exists
 };
