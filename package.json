@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "A minimal wallet for keyper",
   "scripts": {
-    "start": "electron ./src/main.js"
+    "start": "electron ./src/main.js",
+    "postinstall": "electron-builder install-app-deps"
   },
   "repository": "https://github.com/ququzone/keyper-scatter",
   "keywords": [
@@ -14,14 +15,19 @@
   "author": "ququzone <xueping.yang@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^8.0.1"
+    "electron": "^8.0.1",
+    "electron-builder": "^22.3.2"
   },
   "dependencies": {
     "@keyper/container": "0.0.3",
     "@keyper/specs": "0.0.3",
-    "@nervosnetwork/ckb-sdk-utils": "^0.28.0",
+    "@nervosnetwork/ckb-sdk-core": "0.27.1",
+    "@nervosnetwork/ckb-sdk-utils": "0.27.1",
+    "ckb-cache-js": "0.0.2",
+    "electron-log": "^4.0.7",
     "electron-store": "^5.1.1",
     "elliptic": "^6.5.2",
-    "scrypt.js": "^0.3.0"
+    "scrypt.js": "^0.3.0",
+    "sqlite3": "^4.1.1"
   }
 }

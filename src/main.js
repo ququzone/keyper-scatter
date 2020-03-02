@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const wallet = require("./service/wallet");
+const cache = require("./service/cache");
 
 ipcMain.on("newpage", (event, page) => {
   mainWindow.loadFile(path.join(__dirname, `../html/${page}.html`));
@@ -49,6 +50,7 @@ app.on("activate", () => {
 });
 
 wallet.init();
+cache.start();
 
-// @ts-ignore
 global.wallet = wallet;
+global.cache = cache;

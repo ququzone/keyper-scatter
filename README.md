@@ -6,4 +6,6 @@ Keyper wallet
 ## Run
 
 ```
+npm install
+npm run postinsall
 ```
