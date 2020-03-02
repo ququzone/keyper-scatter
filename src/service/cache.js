@@ -1,5 +1,5 @@
+const { app } = require("electron");
 const CKB = require("@nervosnetwork/ckb-sdk-core").default;
-const log = require("electron-log");
 const { DefaultCacheService, initConnection } = require("ckb-cache-js");
 
 let cache;
@@ -7,7 +7,7 @@ let cache;
 const start = (nodeUrl = "http://localhost:8114") => {
   initConnection({
     "type": "sqlite",
-    "database": "keyper.sqlite",
+    "database": `${app.getPath('userData')}/keyper.sqlite`,
     "synchronize": true,
     "logging": false,
     "entities": [
