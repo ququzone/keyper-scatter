@@ -1,4 +1,4 @@
-const { ipcRenderer, remote } = require("electron");
+const { ipcRenderer, remote, clipboard } = require("electron");
 const { QueryBuilder } = require("ckb-cache-js");
 
 const wallet = remote.getGlobal("wallet");
@@ -16,9 +16,13 @@ const initTable = async () => {
         .setLockHash(account.lock)
         .build()
     );
-    table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${result.total}</td><td>transfer</td></tr>`
+    table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${result.total}</td><td><button class="btn btn-default" onclick="copy()" data="${account.address}">Copy</button></td></tr>`
   }
   keys.innerHTML = table;
+}
+
+function copy() {
+  console.log(this);
 }
 
 async function init() {
