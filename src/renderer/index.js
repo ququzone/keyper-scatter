@@ -65,6 +65,12 @@ async function init() {
     await cache.reset();
     await initTable();
   });
+
+  const reload = document.getElementById("reload");
+  reload.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await initTable();
+  });
 }
 
 init();

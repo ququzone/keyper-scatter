@@ -15,7 +15,6 @@ const start = (nodeUrl = "http://localhost:8114") => {
       "node_modules/ckb-cache-js/lib/database/entity/*.js"
     ]
   }).then(() => {
-    cellRepository = new CellRepository();
     const ckb = new CKB(nodeUrl);
     cache = new DefaultCacheService(ckb);
     cache.start();
