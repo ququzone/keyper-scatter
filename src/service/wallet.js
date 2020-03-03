@@ -22,6 +22,7 @@ const reloadKeys = () => {
       keys[scriptToAddress(script)] = {
         key,
         script,
+        lock: scriptToHash(script),
         type: "secp256k1",
       };
     });
@@ -85,6 +86,7 @@ const accounts = () => {
     result.push({
       address: address,
       type: keys[address].type,
+      lock: keys[address].lock,
       amount: 0,
     });
   }

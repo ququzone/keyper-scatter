@@ -1,20 +1,28 @@
 const { ipcRenderer, remote } = require("electron");
+const { QueryBuilder } = require("ckb-cache-js");
 
 const wallet = remote.getGlobal("wallet");
 const cache = remote.getGlobal("cache");
 
-function initTable() {
+const initTable = async () => {
   const accounts = wallet.accounts();
   const keys = document.getElementById("keys");
   let table = "";
-  accounts.forEach(account => {
-    table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${account.amount}</td><td>transfer</td></tr>`
-  });
+
+  for (let i = 0; i < accounts.length; i++) {
+    const account = accounts[i];
+    const result = await cache.findCells(
+      QueryBuilder.create()
+        .setLockHash(account.lock)
+        .build()
+    );
+    table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${result.total}</td><td>transfer</td></tr>`
+  }
   keys.innerHTML = table;
 }
 
-function init() {
-  initTable();
+async function init() {
+  await initTable();
   const create = document.getElementById("create");
   create.addEventListener("click", async (e) => {
     e.preventDefault();
@@ -28,7 +36,7 @@ function init() {
       name: "LockHash",
       data: wallet.publicKeyToLockHash(publicKey),
     });
-    initTable();
+    await initTable();
   });
 }
 
