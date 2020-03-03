@@ -2,7 +2,7 @@ const scrypt = require("scrypt.js");
 const EC = require("elliptic").ec;
 const { Secp256k1LockScript } = require("@keyper/container/lib/locks/secp256k1");
 const { scriptToHash } = require("@nervosnetwork/ckb-sdk-utils/lib");
-const { scriptToAddress, addressToScript } = require("@keyper/specs/lib/address");
+const { scriptToAddress } = require("@keyper/specs/lib/address");
 const keystore = require("@keyper/specs/lib/keystore");
 const storage = require("./storage");
 
@@ -18,8 +18,8 @@ const reloadKeys = () => {
   if (storage.keyperStorage().get("keys")) {
     const innerKeys = storage.keyperStorage().get("keys");
     innerKeys.forEach(key => {
-      const script = secp256k1Lock.script(`0x${key.address}`);
-      keys[scriptToAddress(script)] = {
+      const script = secp256k1Lock.script(`0x${key.publicKey}`);
+      keys[scriptToAddress(script, {networkPrefix: "ckt", short: true})] = {
         key,
         script,
         lock: scriptToHash(script),
@@ -67,7 +67,25 @@ const generateKey = (password) => {
   const publicKey = Buffer.from(key.getPublic().encodeCompressed()).toString("hex");
   const privateKey = key.getPrivate();
   const ks = keystore.encrypt(privateKey.toBuffer(), password);
-  ks.address = publicKey;
+  ks.publicKey = publicKey;
+
+  if (!storage.keyperStorage().get("keys")) {
+    storage.keyperStorage().set("keys", [ks]);
+  } else {
+    const keys = storage.keyperStorage().get("keys");
+    keys.push(ks);
+    storage.keyperStorage().set("keys", keys);
+  }
+  reloadKeys();
+  return publicKey;
+};
+
+const importKey = (privateKey, password) => {
+  const ec = new EC('secp256k1');
+  const key = ec.keyFromPrivate(privateKey);
+  const publicKey = Buffer.from(key.getPublic().encodeCompressed()).toString("hex");
+  const ks = keystore.encrypt(Buffer.from(privateKey, "hex"), password);
+  ks.publicKey = publicKey;
 
   if (!storage.keyperStorage().get("keys")) {
     storage.keyperStorage().set("keys", [ks]);
@@ -84,7 +102,7 @@ const accounts = () => {
   const result = [];
   for (const address in keys) {
     result.push({
-      address: address,
+      address,
       type: keys[address].type,
       lock: keys[address].lock,
       amount: 0,
@@ -105,6 +123,7 @@ module.exports = {
   unlock,
   exists,
   generateKey,
+  importKey,
   accounts,
   publicKeyToLockHash,
 };

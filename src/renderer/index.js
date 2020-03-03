@@ -16,7 +16,7 @@ const initTable = async () => {
         .setLockHash(account.lock)
         .build()
     );
-    table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${result.total}</td><td><button class="pure-button" onclick="transfer(this)" data="${account.address}">Copy</button></td></tr>`
+    table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${result.total}</td><td><button class="pure-button" onclick="transfer(this)" data="${account.address}">Transfer</button></td></tr>`
   }
   keys.innerHTML = table;
 }
@@ -40,6 +40,29 @@ async function init() {
       name: "LockHash",
       data: wallet.publicKeyToLockHash(publicKey),
     });
+    await initTable();
+  });
+
+  const imp = document.getElementById("import");
+  imp.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const password = window.document.getElementById("import-password").value;
+    if ("" === password) {
+      alert("password is empty");
+      return;
+    }
+    const key = window.document.getElementById("import-key").value;
+    if ("" === key) {
+      alert("private key is empty");
+      return;
+    }
+
+    const publicKey = wallet.importKey(key, password);
+    await cache.addRule({
+      name: "LockHash",
+      data: wallet.publicKeyToLockHash(publicKey),
+    });
+    await cache.reset();
     await initTable();
   });
 }
