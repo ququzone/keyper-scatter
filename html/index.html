@@ -9,33 +9,53 @@
       crossorigin="anonymous">
   </head>
   <body style="-webkit-app-region: drag">
-    <div class="window">
-      <div class="window-content">
-        <div class="pane-group">
-          <div class="pane-sm sidebar">
-            <form>
-              <div class="form-group">
-                <label>Password</label>
-                <input id="password" type="password" class="form-control" placeholder="Password">
-              </div>
-              <button class="btn btn-default" id="create">Create</button>
-            </form>
+    <div class="pure-g">
+      <div class="pure-u-1-4">
+        <div>
+          <h3>Reload</h3>
+          <div>
+            <button class="pure-button pure-button-primary" id="reload">Reload</button>
           </div>
-          <div class="pane"> 
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Address</th>
-                  <th>LockType</th>
-                  <th>Amount</th>
-                  <th>Operations</th>
-                </tr>
-              </thead>
-              <tbody id="keys">
-              </tbody>
-            </table>
-          </div>
+          <hr>
+          <h3>Create</h3>
+          <form>
+            <div class="pure-form pure-form-stacked">
+              <input id="password" type="password" placeholder="Password">
+            </div>
+            <button class="pure-button pure-button-primary" id="create">Create</button>
+          </form>
+          <hr>
+          <h3>Import</h3>
+          <form>
+            <div class="pure-form pure-form-stacked">
+              <input type="text" id="import-key" placeholder="Private Key">
+              <input type="password" id="import-password" placeholder="Password">
+            </div>
+            <button class="pure-button pure-button-primary" id="import">Import</button>
+          </form>
+          <hr>
+          <h3>Transfer</h3>
+          <form>
+            <div class="pure-form pure-form-stacked">
+              <input type="text" placeholder="To">
+              <input type="number" placeholder="Amount">
+            </div>
+          </form>
         </div>
+      </div>
+      <div class="pure-u-3-4">
+        <table class="pure-table pure-table-bordered">
+          <thead>
+            <tr>
+              <th>Address</th>
+              <th>LockType</th>
+              <th>Amount</th>
+              <th>Operations</th>
+            </tr>
+          </thead>
+          <tbody id="keys">
+          </tbody>
+        </table>
       </div>
     </div>
   </body>

@@ -16,13 +16,13 @@ const initTable = async () => {
         .setLockHash(account.lock)
         .build()
     );
-    table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${result.total}</td><td><button class="btn btn-default" onclick="copy()" data="${account.address}">Copy</button></td></tr>`
+    table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${result.total}</td><td><button class="pure-button" onclick="transfer(this)" data="${account.address}">Copy</button></td></tr>`
   }
   keys.innerHTML = table;
 }
 
-function copy() {
-  console.log(this);
+function transfer(e) {
+  console.log(e.getAttribute("data"));
 }
 
 async function init() {

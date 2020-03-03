@@ -21,7 +21,6 @@ const start = (nodeUrl = "http://localhost:8114") => {
 };
 
 const addRule = async (rule) => {
-  console.log(rule);
   await cache.addRule(rule);
 };
 

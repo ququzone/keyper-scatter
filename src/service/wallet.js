@@ -41,7 +41,7 @@ const passwordToSeed = (password) => {
 
 const createPassword = async (password) => {
   seed = await passwordToSeed(password);
-  storage.keyperStorage().set("seed", seed);
+  storage.keyperStorage().set("seed", seed.toString("hex"));
 };
 
 const getSeed = () => seed;
