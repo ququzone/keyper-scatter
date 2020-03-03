@@ -21,6 +21,7 @@ const start = (nodeUrl = "http://localhost:8114") => {
 };
 
 const addRule = async (rule) => {
+  console.log(rule);
   await cache.addRule(rule);
 };
 
@@ -28,8 +29,13 @@ const reset = async () => {
   await cache.reset();
 };
 
+const findCells = async (query) => {
+  return await cache.findCells(query);
+}
+
 module.exports = {
   start,
   addRule,
   reset,
+  findCells,
 };

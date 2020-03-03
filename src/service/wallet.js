@@ -19,7 +19,11 @@ const reloadKeys = () => {
     const innerKeys = storage.keyperStorage().get("keys");
     innerKeys.forEach(key => {
       const script = secp256k1Lock.script(`0x${key.address}`);
-      keys[scriptToAddress(script)] = key;
+      keys[scriptToAddress(script)] = {
+        key,
+        script,
+        type: "secp256k1",
+      };
     });
   }
 };
@@ -72,15 +76,24 @@ const generateKey = (password) => {
     storage.keyperStorage().set("keys", keys);
   }
   reloadKeys();
+  return publicKey;
 };
 
 const accounts = () => {
   const result = [];
   for (const address in keys) {
-    const script = addressToScript(address);
-    result.push({lock: scriptToHash(script), address: address});
+    result.push({
+      address: address,
+      type: keys[address].type,
+      amount: 0,
+    });
   }
   return result;
+}
+
+const publicKeyToLockHash = (publicKey) => {
+  const script = secp256k1Lock.script(`0x${publicKey}`);
+  return scriptToHash(script);
 }
 
 module.exports = {
@@ -91,4 +104,5 @@ module.exports = {
   exists,
   generateKey,
   accounts,
+  publicKeyToLockHash,
 };
