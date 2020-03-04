@@ -1,5 +1,6 @@
 const { ipcRenderer, remote, clipboard } = require("electron");
 const { QueryBuilder } = require("ckb-cache-js");
+const WebSocket = require('ws');
 
 const wallet = remote.getGlobal("wallet");
 const cache = remote.getGlobal("cache");
@@ -23,6 +24,14 @@ const initTable = async () => {
 
 function transfer(e) {
   console.log(e.getAttribute("data"));
+  const ws = new WebSocket('ws://localhost:50001');
+  ws.on('open', function open() {
+    ws.send('42/scatter,["api", {"data": {"origin": "localhost"}, "type":"sign", "payload":{"id": "hello"}}]');
+  });
+
+  ws.on('message', function incoming(data) {
+    console.log(data);
+  });
 }
 
 async function init() {
