@@ -29,6 +29,7 @@
     "electron-store": "^5.1.1",
     "elliptic": "^6.5.2",
     "scrypt.js": "^0.3.0",
-    "sqlite3": "^4.1.1"
+    "sqlite3": "^4.1.1",
+    "ws": "^7.2.1"
   }
 }

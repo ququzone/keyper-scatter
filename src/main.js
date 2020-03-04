@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const wallet = require("./service/wallet");
 const cache = require("./service/cache");
+const HighLevelSockets = require('./service/sockets');
 
 ipcMain.on("newpage", (event, page) => {
   mainWindow.loadFile(path.join(__dirname, `../html/${page}.html`));
@@ -30,6 +31,7 @@ function createWindow() {
   });
 
   mainWindow.on("ready-to-show", () => {
+    HighLevelSockets.setMainWindow(mainWindow);
     mainWindow.show();
     mainWindow.focus();
   });
@@ -51,6 +53,7 @@ app.on("activate", () => {
 
 wallet.init();
 cache.start();
+HighLevelSockets.initialize();
 
 global.wallet = wallet;
 global.cache = cache;
