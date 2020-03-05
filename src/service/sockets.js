@@ -41,7 +41,6 @@ class SocketService {
       socket.on('disconnect', () => delete this.openConnections[origin + id]);
 
       socket.on('message', msg => {
-        console.log(msg);
         if (msg.indexOf('42/scatter') === -1) return false;
         const [type, request] = JSON.parse(msg.replace('42/scatter,', ''));
 
@@ -56,7 +55,7 @@ class SocketService {
         else if (origin && requestOrigin !== origin) return killRequest();
 
         if (!this.openConnections.hasOwnProperty(origin + id)) this.openConnections[origin + id] = socket;
-        console.log(request);
+        mainWindow.webContents.send(`popup-${request.type}`, request.payload);
       });
     };
 

@@ -1,4 +1,4 @@
-const { ipcRenderer, remote, clipboard } = require("electron");
+const { ipcRenderer, remote } = require("electron");
 const { QueryBuilder } = require("ckb-cache-js");
 const WebSocket = require('ws');
 
@@ -83,3 +83,22 @@ async function init() {
 }
 
 init();
+
+ipcRenderer.on('popup-sign', function(event, message){
+  const modal = document.getElementById("sign-modal");
+  modal.style.opacity = 30;
+  modal.style.visibility = "visible";
+  const reject = document.getElementById("reject");
+  reject.addEventListener("click", async (e) => {
+    e.preventDefault();
+    modal.style.opacity = 0;
+    modal.style.visibility = "hidden";
+  });
+  const sign = document.getElementById("sign");
+  sign.addEventListener("click", async (e) => {
+    e.preventDefault();
+    console.log(modal.style);
+    modal.style.opacity = 0;
+    modal.style.visibility = "hidden";
+  });
+});
