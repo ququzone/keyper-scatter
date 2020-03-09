@@ -8,6 +8,7 @@ const WebSocket = require('ws');
 const wallet = remote.getGlobal("wallet");
 const cache = remote.getGlobal("cache");
 const HighLevelSockets = remote.getGlobal("HighLevelSockets");
+let socketMessage;
 
 const initTable = async () => {
   const accounts = wallet.accounts();
@@ -157,18 +158,12 @@ async function init() {
     e.preventDefault();
     await initTable();
   });
-}
 
-init();
-
-ipcRenderer.on('popup-sign', function(event, message){
   const modal = document.getElementById("sign-modal");
-  modal.style.opacity = 30;
-  modal.style.visibility = "visible";
   const reject = document.getElementById("reject");
   reject.addEventListener("click", async (e) => {
     e.preventDefault();
-    HighLevelSockets.sendEvent("REJECT_SIGN", "user reject sign", message.origin);
+    HighLevelSockets.sendEvent("REJECT_SIGN", "user reject sign", socketMessage.origin);
     modal.style.opacity = 0;
     modal.style.visibility = "hidden";
   });
@@ -181,14 +176,21 @@ ipcRenderer.on('popup-sign', function(event, message){
       return;
     }
 
-    const signObj = message.payload;
+    const signObj = socketMessage.payload;
     const tx = await wallet.signTx(signObj.target, password, signObj.tx);
-    // TODO
-    tx.witnesses[0] = "0x550000001000000055000000550000004100000040e3461c106dad1e6d572b0503f1682d012ded8a3a5a706acfe61cb62aae44d96f051ada75cb0c804a07f380fdda8e33efb4fa5c4507961c7028bcb5e8da485301";
     const hash = await cache.sendTx(tx);
-    console.log(hash);
+    HighLevelSockets.sendEvent("SEND_TX", hash, socketMessage.origin);
 
     modal.style.opacity = 0;
     modal.style.visibility = "hidden";
   });
+}
+
+init();
+
+ipcRenderer.on('popup-sign', function(event, message) {
+  const modal = document.getElementById("sign-modal");
+  modal.style.opacity = 30;
+  modal.style.visibility = "visible";
+  socketMessage = message;
 });
