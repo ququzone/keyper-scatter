@@ -19,12 +19,11 @@
     "electron-builder": "^22.3.2"
   },
   "dependencies": {
-    "@keyper/container": "0.0.3",
-    "@keyper/specs": "0.0.3",
+    "@keyper/container": "0.0.4",
+    "@keyper/specs": "0.0.4",
     "@nervosnetwork/ckb-sdk-core": "0.27.1",
     "@nervosnetwork/ckb-sdk-utils": "0.27.1",
-    "bn.js": "^5.1.1",
-    "ckb-cache-js": "0.0.3",
+    "ckb-cache-js": "0.0.4",
     "electron-log": "^4.0.7",
     "electron-store": "^5.1.1",
     "elliptic": "^6.5.2",

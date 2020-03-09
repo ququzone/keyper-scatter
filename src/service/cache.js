@@ -29,9 +29,13 @@ const reset = async () => {
   await cache.resetStartBlockNumber("1");
 };
 
-const findCells = async (query) => {
+const findCells = async (q) => {
+  const query = JSON.parse(q);
   query.capacityFetcher = (cell) => {
     return new BN(cell.capacity.slice(2), 16);
+  }
+  if (query.capacity) {
+    query.capacity = new BN(query.capacity);
   }
   return await cache.findCells(query);
 }

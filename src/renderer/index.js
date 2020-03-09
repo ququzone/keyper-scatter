@@ -17,9 +17,11 @@ const initTable = async () => {
   for (let i = 0; i < accounts.length; i++) {
     const account = accounts[i];
     const result = await cache.findCells(
-      QueryBuilder.create()
-        .setLockHash(account.lock)
-        .build()
+      JSON.stringify(
+        QueryBuilder.create()
+          .setLockHash(account.lock)
+          .build()
+      )
     );
     table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${result.total}</td><td><button class="pure-button" onclick="transfer(this)" data="${account.address}">Transfer</button></td></tr>`
   }
@@ -36,14 +38,15 @@ async function transfer(e) {
   const total = new BN(toAmount).add(new BN("1000"));
   const lock = addressToScript(e.getAttribute("data"));
   const toLock = addressToScript(toAddress);
-  const cells = await cache.findCells(
-    QueryBuilder.create()
-      .setLockHash(scriptToHash(lock))
-      .setTypeCodeHash("null")
-      .setData("0x")
-      .setCapacity(total)
-      .build()
-  );
+  const query = QueryBuilder.create()
+    .setLockHash(scriptToHash(lock))
+    .setTypeCodeHash("null")
+    .setData("0x")
+    .setCapacity(total.toString())
+    .build();
+  query.capacityFetcher = undefined;
+  query.capacity = total.toString();
+  const cells = await cache.findCells(JSON.stringify(query));
   if (cells.total.lt(total)) {
     alert("insufficient balance");
     return;
@@ -55,7 +58,7 @@ async function transfer(e) {
         txHash: "0x84dcb061adebff4ef93d57c975ba9058a9be939d79ea12ee68003f6492448890",
         index: "0x0"
       },
-      depType: "dep_group",
+      depType: "depGroup",
     }],
     headerDeps: [],
     inputs: [],
@@ -163,7 +166,6 @@ ipcRenderer.on('popup-sign', function(event, message){
   modal.style.opacity = 30;
   modal.style.visibility = "visible";
   const reject = document.getElementById("reject");
-  console.log(message);
   reject.addEventListener("click", async (e) => {
     e.preventDefault();
     HighLevelSockets.sendEvent("REJECT_SIGN", "user reject sign", message.origin);
@@ -173,8 +175,16 @@ ipcRenderer.on('popup-sign', function(event, message){
   const sign = document.getElementById("sign");
   sign.addEventListener("click", async (e) => {
     e.preventDefault();
+    const password = window.document.getElementById("sign-password").value;
+    if ("" === password) {
+      alert("password is empty");
+      return;
+    }
+
     const signObj = message.payload;
-    
+    const tx = await wallet.signTx(signObj.target, password, signObj.tx);
+    console.log(JSON.stringify(tx));
+
     modal.style.opacity = 0;
     modal.style.visibility = "hidden";
   });

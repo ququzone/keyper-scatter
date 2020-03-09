@@ -10,6 +10,13 @@ let seed, keys, secp256k1Lock;
 
 const init = () => {
   secp256k1Lock = new Secp256k1LockScript();
+  secp256k1Lock.setProvider({
+    sign: async function(privateKey, message) {
+      const ec = new EC('secp256k1');
+      const key = ec.keyFromPrivate(privateKey);
+      return `0x${key.sign(message, {canonical: true}).toDER('hex')}`;
+    }
+  });
   keys = {};
   reloadKeys();
 };
@@ -116,6 +123,17 @@ const publicKeyToLockHash = (publicKey) => {
   return scriptToHash(script);
 }
 
+const signTx = async (address, password, rawTx) => {
+  const key = keys[address];
+  if (!key) {
+    throw new Error(`no key for address: ${address}`);
+  }
+  const ks = key.key;
+  const privateKey = keystore.decrypt(ks, password);
+  const tx = await secp256k1Lock.sign(privateKey, rawTx, {index: 0, length: -1});
+  return tx;
+}
+
 module.exports = {
   init,
   createPassword,
@@ -126,4 +144,5 @@ module.exports = {
   importKey,
   accounts,
   publicKeyToLockHash,
+  signTx,
 };
