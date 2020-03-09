@@ -23,7 +23,7 @@ const reloadKeys = () => {
         key,
         script,
         lock: scriptToHash(script),
-        type: "secp256k1",
+        type: secp256k1Lock.name,
       };
     });
   }

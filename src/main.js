@@ -57,3 +57,4 @@ HighLevelSockets.initialize();
 
 global.wallet = wallet;
 global.cache = cache;
+global.HighLevelSockets = HighLevelSockets;

@@ -44,18 +44,13 @@ class SocketService {
         if (msg.indexOf('42/scatter') === -1) return false;
         const [type, request] = JSON.parse(msg.replace('42/scatter,', ''));
 
-        let requestOrigin;
-        if (request.data.hasOwnProperty('payload')) {
-          request.data.payload.origin = request.data.payload.origin.replace(/\s/g, "").trim();
-          requestOrigin = request.data.payload.origin;
-
-        } else requestOrigin = request.data.origin.replace(/\s/g, "").trim();
+        let requestOrigin = request.data.origin.replace(/\s/g, "").trim();
 
         if (!origin) origin = requestOrigin;
         else if (origin && requestOrigin !== origin) return killRequest();
 
         if (!this.openConnections.hasOwnProperty(origin + id)) this.openConnections[origin + id] = socket;
-        mainWindow.webContents.send(`popup-${request.type}`, request.payload);
+        mainWindow.webContents.send(`popup-${request.type}`, request.data);
       });
     };
 
