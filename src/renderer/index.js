@@ -183,7 +183,10 @@ ipcRenderer.on('popup-sign', function(event, message){
 
     const signObj = message.payload;
     const tx = await wallet.signTx(signObj.target, password, signObj.tx);
-    console.log(JSON.stringify(tx));
+    // TODO
+    tx.witnesses[0] = "0x550000001000000055000000550000004100000040e3461c106dad1e6d572b0503f1682d012ded8a3a5a706acfe61cb62aae44d96f051ada75cb0c804a07f380fdda8e33efb4fa5c4507961c7028bcb5e8da485301";
+    const hash = await cache.sendTx(tx);
+    console.log(hash);
 
     modal.style.opacity = 0;
     modal.style.visibility = "hidden";

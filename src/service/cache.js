@@ -3,7 +3,7 @@ const BN = require('bn.js');
 const CKB = require("@nervosnetwork/ckb-sdk-core").default;
 const { DefaultCacheService, initConnection } = require("ckb-cache-js");
 
-let cache;
+let cache, ckb;
 
 const start = (nodeUrl = "http://localhost:8114") => {
   initConnection({
@@ -15,7 +15,7 @@ const start = (nodeUrl = "http://localhost:8114") => {
       "node_modules/ckb-cache-js/lib/database/entity/*.js"
     ]
   }).then(() => {
-    const ckb = new CKB(nodeUrl);
+    ckb = new CKB(nodeUrl);
     cache = new DefaultCacheService(ckb);
     cache.start();
   });
@@ -40,9 +40,15 @@ const findCells = async (q) => {
   return await cache.findCells(query);
 }
 
+const sendTx = async (tx) => {
+  const hash = await ckb.rpc.sendTransaction(tx);
+  return hash;
+}
+
 module.exports = {
   start,
   addRule,
   reset,
   findCells,
+  sendTx,
 };

@@ -1,7 +1,7 @@
 const scrypt = require("scrypt.js");
 const EC = require("elliptic").ec;
 const { Secp256k1LockScript } = require("@keyper/container/lib/locks/secp256k1");
-const { scriptToHash } = require("@nervosnetwork/ckb-sdk-utils/lib");
+const { scriptToHash, hexToBytes } = require("@nervosnetwork/ckb-sdk-utils/lib");
 const { scriptToAddress } = require("@keyper/specs/lib/address");
 const keystore = require("@keyper/specs/lib/keystore");
 const storage = require("./storage");
@@ -10,13 +10,6 @@ let seed, keys, secp256k1Lock;
 
 const init = () => {
   secp256k1Lock = new Secp256k1LockScript();
-  secp256k1Lock.setProvider({
-    sign: async function(privateKey, message) {
-      const ec = new EC('secp256k1');
-      const key = ec.keyFromPrivate(privateKey);
-      return `0x${key.sign(message, {canonical: true}).toDER('hex')}`;
-    }
-  });
   keys = {};
   reloadKeys();
 };
@@ -130,7 +123,26 @@ const signTx = async (address, password, rawTx) => {
   }
   const ks = key.key;
   const privateKey = keystore.decrypt(ks, password);
-  const tx = await secp256k1Lock.sign(privateKey, rawTx, {index: 0, length: -1});
+
+  secp256k1Lock.setProvider({
+    sign: async function(_address, message) {
+      const ec = new EC('secp256k1');
+      const key = ec.keyFromPrivate(privateKey);
+      const msg = typeof message === 'string' ? hexToBytes(message) : message;
+      const { r, s, recoveryParam } = key.sign(msg, {
+        canonical: true,
+      });
+      if (recoveryParam === null){
+        throw new Error('Fail to sign the message');
+      }
+      const fmtR = r.toString(16).padStart(64, '0');
+      const fmtS = s.toString(16).padStart(64, '0');
+      const signature = `0x${fmtR}${fmtS}0${recoveryParam}`;
+      return signature;
+    }
+  });
+
+  const tx = await secp256k1Lock.sign(address, rawTx, {index: 0, length: -1});
   return tx;
 }
 
