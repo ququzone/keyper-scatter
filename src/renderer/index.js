@@ -104,7 +104,7 @@ async function transfer(e) {
 
   const ws = new WebSocket('ws://localhost:50001');
   ws.on('open', function open() {
-    ws.send(`42/scatter,["api", {"data": {"origin": "localhost", "payload":${JSON.stringify(signObj)}}, "type":"sign"}]`);
+    ws.send(`42/keyper,["api", {"data": {"origin": "localhost", "payload":${JSON.stringify(signObj)}}, "type":"sign"}]`);
   });
 
   ws.on('message', function incoming(data) {

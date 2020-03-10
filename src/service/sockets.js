@@ -24,7 +24,7 @@ class SocketService {
 
   async emitSocket(socket, path, data) {
     if (!socket) return console.error('No socket found');
-    socket.send('42/scatter,' + JSON.stringify([path, data ? data : false]))
+    socket.send('42/keyper,' + JSON.stringify([path, data ? data : false]))
   }
 
   async initialize() {
@@ -32,8 +32,8 @@ class SocketService {
       let origin = null;
 
       socket.send("40");
-      socket.send("40/scatter");
-      socket.send(`42/scatter,["connected"]`);
+      socket.send("40/keyper");
+      socket.send(`42/keyper,["connected"]`);
 
       const id = Math.round(Math.random() * 999999999).toString();
 
@@ -41,8 +41,8 @@ class SocketService {
       socket.on('disconnect', () => delete this.openConnections[origin + id]);
 
       socket.on('message', msg => {
-        if (msg.indexOf('42/scatter') === -1) return false;
-        const [type, request] = JSON.parse(msg.replace('42/scatter,', ''));
+        if (msg.indexOf('42/keyper') === -1) return false;
+        const [type, request] = JSON.parse(msg.replace('42/keyper,', ''));
 
         let requestOrigin = request.data.origin.replace(/\s/g, "").trim();
 
