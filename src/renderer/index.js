@@ -148,8 +148,7 @@ async function init() {
     await cache.addRule({
       name: "LockHash",
       data: wallet.publicKeyToLockHash(publicKey),
-    });
-    await cache.reset();
+    }, "1000");
     await initTable();
   });
 

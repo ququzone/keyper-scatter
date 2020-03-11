@@ -21,12 +21,8 @@ const start = (nodeUrl = "http://localhost:8114") => {
   });
 };
 
-const addRule = async (rule) => {
-  await cache.addRule(rule);
-};
-
-const reset = async () => {
-  await cache.resetStartBlockNumber("1");
+const addRule = async (rule, beginBlockNumber) => {
+  await cache.addRule(rule, beginBlockNumber);
 };
 
 const findCells = async (q) => {
@@ -48,7 +44,6 @@ const sendTx = async (tx) => {
 module.exports = {
   start,
   addRule,
-  reset,
   findCells,
   sendTx,
 };
