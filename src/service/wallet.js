@@ -1,15 +1,43 @@
 const scrypt = require("scrypt.js");
 const EC = require("elliptic").ec;
+const { SignatureAlgorithm } = require("@keyper/specs/lib");
+const { Container } = require("@keyper/container/lib");
 const { Secp256k1LockScript } = require("@keyper/container/lib/locks/secp256k1");
 const { scriptToHash, hexToBytes } = require("@nervosnetwork/ckb-sdk-utils/lib");
 const { scriptToAddress } = require("@keyper/specs/lib/address");
 const keystore = require("@keyper/specs/lib/keystore");
 const storage = require("./storage");
 
-let seed, keys, secp256k1Lock;
+let seed, keys, container;
 
 const init = () => {
-  secp256k1Lock = new Secp256k1LockScript();
+  container = new Container([{
+    algorithm: SignatureAlgorithm.secp256k1,
+    provider: {
+      sign: async function(context, message) {
+        const key = keys[context.publicKey];
+        if (!key) {
+          throw new Error(`no key for address: ${context.address}`);
+        }
+        const privateKey = keystore.decrypt(key, context.password);
+
+        const ec = new EC('secp256k1');
+        const keypair = ec.keyFromPrivate(privateKey);
+        const msg = typeof message === 'string' ? hexToBytes(message) : message;
+        const { r, s, recoveryParam } = keypair.sign(msg, {
+          canonical: true,
+        });
+        if (recoveryParam === null){
+          throw new Error('Fail to sign the message');
+        }
+        const fmtR = r.toString(16).padStart(64, '0');
+        const fmtS = s.toString(16).padStart(64, '0');
+        const signature = `0x${fmtR}${fmtS}0${recoveryParam}`;
+        return signature;
+      }
+    }
+  }]);
+  container.addLockScript(new Secp256k1LockScript());
   keys = {};
   reloadKeys();
 };
@@ -18,13 +46,11 @@ const reloadKeys = () => {
   if (storage.keyperStorage().get("keys")) {
     const innerKeys = storage.keyperStorage().get("keys");
     innerKeys.forEach(key => {
-      const script = secp256k1Lock.script(`0x${key.publicKey}`);
-      keys[scriptToAddress(script, {networkPrefix: "ckt", short: true})] = {
-        key,
-        script,
-        lock: scriptToHash(script),
-        type: secp256k1Lock.name,
-      };
+      container.addPublicKey({
+        payload: `0x${key.publicKey}`,
+        algorithm: SignatureAlgorithm.secp256k1,
+      });
+      keys[`0x${key.publicKey}`] = key;
     });
   }
 };
@@ -61,7 +87,7 @@ const unlock = async (password) => {
   return false;
 };
 
-const generateKey = (password) => {
+const generateKey = async (password) => {
   const ec = new EC('secp256k1');
   const key = ec.genKeyPair();
   const publicKey = Buffer.from(key.getPublic().encodeCompressed()).toString("hex");
@@ -76,11 +102,26 @@ const generateKey = (password) => {
     keys.push(ks);
     storage.keyperStorage().set("keys", keys);
   }
-  reloadKeys();
+  container.addPublicKey({
+    payload: `0x${publicKey}`,
+    algorithm: SignatureAlgorithm.secp256k1,
+  });
+  keys[`0x${publicKey}`] = key;
+  const scripts = container.getScripsByPublicKey({
+    payload: `0x${publicKey}`,
+    algorithm: SignatureAlgorithm.secp256k1,
+  });
+  scripts.forEach(async (script) => {
+    await global.cache.addRule({
+      name: "LockHash",
+      data: scriptToHash(script),
+    });
+  });
+
   return publicKey;
 };
 
-const importKey = (privateKey, password) => {
+const importKey = async (privateKey, password) => {
   const ec = new EC('secp256k1');
   const key = ec.keyFromPrivate(privateKey);
   const publicKey = Buffer.from(key.getPublic().encodeCompressed()).toString("hex");
@@ -94,55 +135,40 @@ const importKey = (privateKey, password) => {
     keys.push(ks);
     storage.keyperStorage().set("keys", keys);
   }
-  reloadKeys();
+
+  const scripts = container.getScripsByPublicKey({
+    payload: `0x${publicKey}`,
+    algorithm: SignatureAlgorithm.secp256k1,
+  });
+  scripts.forEach(async (script) => {
+    await global.cache.addRule({
+      name: "LockHash",
+      data: scriptToHash(script),
+    }, "1000");
+  });
   return publicKey;
 };
 
-const accounts = () => {
+const accounts = async () => {
+  const scripts = await container.getAllLockHashesAndMeta();
   const result = [];
-  for (const address in keys) {
+  for (let i = 0; i < scripts.length; i++) {
+    const script = scripts[i];
     result.push({
-      address,
-      type: keys[address].type,
-      lock: keys[address].lock,
+      address: scriptToAddress(script.meta.script, {networkPrefix: "ckt", short: true}),
+      type: script.meta.name,
+      lock: script.hash,
       amount: 0,
     });
   }
   return result;
 }
 
-const publicKeyToLockHash = (publicKey) => {
-  const script = secp256k1Lock.script(`0x${publicKey}`);
-  return scriptToHash(script);
-}
-
-const signTx = async (address, password, rawTx) => {
-  const key = keys[address];
-  if (!key) {
-    throw new Error(`no key for address: ${address}`);
-  }
-  const ks = key.key;
-  const privateKey = keystore.decrypt(ks, password);
-
-  secp256k1Lock.setProvider({
-    sign: async function(_address, message) {
-      const ec = new EC('secp256k1');
-      const key = ec.keyFromPrivate(privateKey);
-      const msg = typeof message === 'string' ? hexToBytes(message) : message;
-      const { r, s, recoveryParam } = key.sign(msg, {
-        canonical: true,
-      });
-      if (recoveryParam === null){
-        throw new Error('Fail to sign the message');
-      }
-      const fmtR = r.toString(16).padStart(64, '0');
-      const fmtS = s.toString(16).padStart(64, '0');
-      const signature = `0x${fmtR}${fmtS}0${recoveryParam}`;
-      return signature;
-    }
-  });
-
-  const tx = await secp256k1Lock.sign(address, rawTx, {index: 0, length: -1});
+const signTx = async (lockHash, password, rawTx) => {
+  const tx = await container.sign({
+    lockHash: lockHash,
+    password,
+  }, rawTx, {index: 0, length: -1});
   return tx;
 }
 
@@ -155,6 +181,5 @@ module.exports = {
   generateKey,
   importKey,
   accounts,
-  publicKeyToLockHash,
   signTx,
 };

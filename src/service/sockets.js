@@ -49,8 +49,19 @@ class SocketService {
         if (!origin) origin = requestOrigin;
         else if (origin && requestOrigin !== origin) return killRequest();
 
-        if (!this.openConnections.hasOwnProperty(origin + id)) this.openConnections[origin + id] = socket;
-        mainWindow.webContents.send(`popup-${request.type}`, request.data);
+        if (!this.openConnections.hasOwnProperty(origin + id)) {
+          this.openConnections[origin + id] = socket;
+        }
+        if (type === "api") {
+          if (request.type === "sign") {
+            mainWindow.webContents.send(`popup-${request.type}`, request.data);
+          }
+          if (request.type === "query") {
+            if (request.data.payload.method === "allAddresses") {
+              
+            }
+          }
+        }
       });
     };
 

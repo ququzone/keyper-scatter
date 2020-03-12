@@ -11,7 +11,7 @@ const HighLevelSockets = remote.getGlobal("HighLevelSockets");
 let socketMessage;
 
 const initTable = async () => {
-  const accounts = wallet.accounts();
+  const accounts = await wallet.accounts();
   const keys = document.getElementById("keys");
   let table = "";
 
@@ -98,7 +98,7 @@ async function transfer(e) {
   }
 
   const signObj = {
-    target: e.getAttribute("data"),
+    target: scriptToHash(lock),
     tx: rawTx,
   }
 
@@ -122,11 +122,7 @@ async function init() {
       alert("password is empty");
       return;
     }
-    const publicKey = wallet.generateKey(password);
-    await cache.addRule({
-      name: "LockHash",
-      data: wallet.publicKeyToLockHash(publicKey),
-    });
+    await wallet.generateKey(password);
     await initTable();
   });
 
@@ -144,11 +140,7 @@ async function init() {
       return;
     }
 
-    const publicKey = wallet.importKey(key, password);
-    await cache.addRule({
-      name: "LockHash",
-      data: wallet.publicKeyToLockHash(publicKey),
-    }, "1000");
+    await wallet.importKey(key, password);
     await initTable();
   });
 
