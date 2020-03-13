@@ -172,6 +172,10 @@ const signTx = async (lockHash, password, rawTx) => {
   return tx;
 }
 
+const getAllLockHashesAndMeta = async () => {
+  return container.getAllLockHashesAndMeta();
+}
+
 module.exports = {
   init,
   createPassword,
@@ -182,4 +186,5 @@ module.exports = {
   importKey,
   accounts,
   signTx,
+  getAllLockHashesAndMeta,
 };

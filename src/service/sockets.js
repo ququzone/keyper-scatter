@@ -40,10 +40,9 @@ class SocketService {
       socket.on('close', () => delete this.openConnections[origin + id]);
       socket.on('disconnect', () => delete this.openConnections[origin + id]);
 
-      socket.on('message', msg => {
+      socket.on('message', async msg => {
         if (msg.indexOf('42/keyper') === -1) return false;
         const [type, request] = JSON.parse(msg.replace('42/keyper,', ''));
-
         let requestOrigin = request.data.origin.replace(/\s/g, "").trim();
 
         if (!origin) origin = requestOrigin;
@@ -57,8 +56,9 @@ class SocketService {
             mainWindow.webContents.send(`popup-${request.type}`, request.data);
           }
           if (request.type === "query") {
-            if (request.data.payload.method === "allAddresses") {
-              
+            if (request.data.payload.method === "ALL_LOCKS") {
+              const locks = await global.wallet.getAllLockHashesAndMeta();
+              socket.send('42/keyper,' + JSON.stringify(["api", {query:"ALL_LOCKS", payload: locks}]));
             }
           }
         }
