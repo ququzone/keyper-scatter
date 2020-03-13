@@ -3,6 +3,7 @@ const path = require("path");
 const wallet = require("./service/wallet");
 const cache = require("./service/cache");
 const HighLevelSockets = require('./service/sockets');
+const server = require("./service/server");
 
 ipcMain.on("newpage", (event, page) => {
   mainWindow.loadFile(path.join(__dirname, `../html/${page}.html`));
