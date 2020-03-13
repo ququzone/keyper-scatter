@@ -21,15 +21,6 @@ const server = http.createServer((req, res) => {
       res.end();
       return;
     }
-    if (body.type === "udt") {
-      body.capacityFetcher = (cell) => {
-        return new BN(Buffer.from(cell.data.slice(2), "hex"), 16, "le");
-      };
-    } else {
-      body.capacityFetcher = (cell) => {
-        return new BN(cell.capacity.slice(2), 16);
-      };
-    }
     const cells = await global.cache.findCells(body);
     const result = JSON.stringify(cells);
 

@@ -27,8 +27,14 @@ const addRule = async (rule, beginBlockNumber) => {
 
 const findCells = async (q) => {
   const query = JSON.parse(q);
-  query.capacityFetcher = (cell) => {
-    return new BN(cell.capacity.slice(2), 16);
+  if (query.type === "udt") {
+    query.capacityFetcher = (cell) => {
+      return new BN(Buffer.from(cell.data.slice(2), "hex"), 16, "le");
+    };
+  } else {
+    query.capacityFetcher = (cell) => {
+      return new BN(cell.capacity.slice(2), 16);
+    };
   }
   if (query.capacity) {
     query.capacity = new BN(query.capacity);
