@@ -52,6 +52,7 @@ async function transfer(e) {
     alert("insufficient balance");
     return;
   }
+  // TODO query from Lock
   const rawTx = {
     version: "0x0",
     cellDeps: [{
