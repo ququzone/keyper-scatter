@@ -52,16 +52,9 @@ async function transfer(e) {
     alert("insufficient balance");
     return;
   }
-  // TODO query from Lock
   const rawTx = {
     version: "0x0",
-    cellDeps: [{
-      outPoint: {
-        txHash: "0x84dcb061adebff4ef93d57c975ba9058a9be939d79ea12ee68003f6492448890",
-        index: "0x0"
-      },
-      depType: "depGroup",
-    }],
+    cellDeps: [],
     headerDeps: [],
     inputs: [],
     outputs: [],

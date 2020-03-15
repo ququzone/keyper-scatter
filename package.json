@@ -19,7 +19,7 @@
     "electron-builder": "^22.3.2"
   },
   "dependencies": {
-    "@keyper/container": "0.0.10",
+    "@keyper/container": "0.0.11",
     "@keyper/specs": "0.0.7",
     "@nervosnetwork/ckb-sdk-core": "0.27.1",
     "@nervosnetwork/ckb-sdk-utils": "0.27.1",
