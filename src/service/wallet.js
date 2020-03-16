@@ -7,6 +7,7 @@ const { scriptToHash, hexToBytes } = require("@nervosnetwork/ckb-sdk-utils/lib")
 const { scriptToAddress } = require("@keyper/specs/lib/address");
 const keystore = require("@keyper/specs/lib/keystore");
 const storage = require("./storage");
+const Keccak256LockScript = require("./locks/keccak256");
 
 let seed, keys, container;
 
@@ -14,6 +15,16 @@ const init = () => {
   container = new Container([{
     algorithm: SignatureAlgorithm.secp256k1,
     provider: {
+      padToEven: function(value) {
+        var a = value;
+        if (typeof a !== 'string') {
+          throw new Error(`value must be string, is currently ${typeof a}, while padToEven.`);
+        }
+        if (a.length % 2) {
+          a = `0${a}`;
+        }
+        return a;
+      },
       sign: async function(context, message) {
         const key = keys[context.publicKey];
         if (!key) {
@@ -24,7 +35,7 @@ const init = () => {
         const ec = new EC('secp256k1');
         const keypair = ec.keyFromPrivate(privateKey);
         const msg = typeof message === 'string' ? hexToBytes(message) : message;
-        const { r, s, recoveryParam } = keypair.sign(msg, {
+        let { r, s, recoveryParam } = keypair.sign(msg, {
           canonical: true,
         });
         if (recoveryParam === null){
@@ -32,12 +43,13 @@ const init = () => {
         }
         const fmtR = r.toString(16).padStart(64, '0');
         const fmtS = s.toString(16).padStart(64, '0');
-        const signature = `0x${fmtR}${fmtS}0${recoveryParam}`;
+        const signature = `0x${fmtR}${fmtS}${this.padToEven(recoveryParam.toString(16))}`;
         return signature;
       }
     }
   }]);
   container.addLockScript(new Secp256k1LockScript());
+  container.addLockScript(new Keccak256LockScript());
   keys = {};
   reloadKeys();
 };
@@ -51,6 +63,24 @@ const reloadKeys = () => {
         algorithm: SignatureAlgorithm.secp256k1,
       });
       keys[`0x${key.publicKey}`] = key;
+    });
+  }
+};
+
+const reloadCacheRuls = async () => {
+  if (storage.keyperStorage().get("keys")) {
+    const innerKeys = storage.keyperStorage().get("keys");
+    innerKeys.forEach(key => {
+      const scripts = container.getScripsByPublicKey({
+        payload: `0x${key.publicKey}`,
+        algorithm: SignatureAlgorithm.secp256k1,
+      });
+      scripts.forEach(async (script) => {
+        await global.cache.addRule({
+          name: "LockHash",
+          data: scriptToHash(script),
+        });
+      });
     });
   }
 };
@@ -187,4 +217,5 @@ module.exports = {
   accounts,
   signTx,
   getAllLockHashesAndMeta,
+  reloadCacheRuls,
 };

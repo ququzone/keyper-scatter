@@ -5,8 +5,8 @@ const { DefaultCacheService, initConnection } = require("ckb-cache-js");
 
 let cache, ckb;
 
-const start = (nodeUrl = "http://localhost:8114") => {
-  initConnection({
+const start = async (nodeUrl = "http://localhost:8114") => {
+  await initConnection({
     "type": "sqlite",
     "database": `${app.getPath('userData')}/keyper.sqlite`,
     "synchronize": true,
@@ -14,11 +14,10 @@ const start = (nodeUrl = "http://localhost:8114") => {
     "entities": [
       "node_modules/ckb-cache-js/lib/database/entity/*.js"
     ]
-  }).then(() => {
-    ckb = new CKB(nodeUrl);
-    cache = new DefaultCacheService(ckb);
-    cache.start();
   });
+  ckb = new CKB(nodeUrl);
+  cache = new DefaultCacheService(ckb);
+  cache.start();
 };
 
 const addRule = async (rule, beginBlockNumber) => {

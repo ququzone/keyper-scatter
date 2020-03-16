@@ -52,10 +52,13 @@ app.on("activate", () => {
   }
 });
 
-wallet.init();
-cache.start();
-HighLevelSockets.initialize();
 
 global.wallet = wallet;
 global.cache = cache;
 global.HighLevelSockets = HighLevelSockets;
+
+wallet.init();
+cache.start().then(() => {
+  wallet.reloadCacheRuls();
+});
+HighLevelSockets.initialize();
