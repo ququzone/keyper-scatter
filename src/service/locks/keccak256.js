@@ -111,9 +111,7 @@ class Keccak256LockScript {
     const message = this.hashMessage(createKeccakHash("keccak256").update(new Buffer(hashBytes)).digest());
 
     const signd = await this.provider.sign(context, message);
-    // @ts-ignore
     rawTx.witnesses[config.index].lock = signd;
-    // @ts-ignore
     rawTx.witnesses[config.index] = utils.serializeWitnessArgs(rawTx.witnesses[config.index]);
 
     return rawTx;
