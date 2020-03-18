@@ -8,6 +8,7 @@ const { scriptToAddress } = require("@keyper/specs/lib/address");
 const keystore = require("@keyper/specs/lib/keystore");
 const storage = require("./storage");
 const Keccak256LockScript = require("./locks/keccak256");
+const AnyPayLockScript = require("./locks/anypay");
 
 let seed, keys, container;
 
@@ -50,6 +51,7 @@ const init = () => {
   }]);
   container.addLockScript(new Secp256k1LockScript());
   container.addLockScript(new Keccak256LockScript());
+  container.addLockScript(new AnyPayLockScript());
   keys = {};
   reloadKeys();
 };
@@ -194,11 +196,12 @@ const accounts = async () => {
   return result;
 }
 
-const signTx = async (lockHash, password, rawTx) => {
+const signTx = async (lockHash, password, rawTx, config) => {
   const tx = await container.sign({
     lockHash: lockHash,
     password,
-  }, rawTx, {index: 0, length: -1});
+  }, rawTx, config);
+  console.log(JSON.stringify(rawTx));
   return tx;
 }
 

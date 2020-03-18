@@ -24,9 +24,113 @@ const initTable = async () => {
           .build()
       )
     );
-    table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${result.total}</td><td><button class="pure-button" onclick="transfer(this)" data="${account.address}">Transfer</button></td></tr>`
+    table = `${table}<tr><td>${account.address}</td><td>${account.type}</td><td>${result.total}</td><td><button class="pure-button" onclick="transfer(this)" data="${account.address}">Transfer</button><button class="pure-button" onclick="transferAny(this)" data="${account.address}">Transfer Any</button><button class="pure-button" onclick="createUDTAny(this)" data="${account.address}">Create UDT Any</button></td></tr>`
   }
   keys.innerHTML = table;
+}
+
+async function transferAny(e) {
+  const toAddress = window.document.getElementById("transfer-to").value;
+  const toAmount = window.document.getElementById("transfer-amount").value;
+  if ("" === toAddress || "" === toAmount) {
+    alert("inputs empty");
+    return;
+  }
+  const total = new BN(toAmount).add(new BN("1000"));
+  const lock = addressToScript(e.getAttribute("data"));
+  const toLock = addressToScript(toAddress);
+  const query = QueryBuilder.create()
+    .setLockHash(scriptToHash(lock))
+    .setTypeCodeHash("null")
+    .setData("0x")
+    .setCapacity(total.toString())
+    .build();
+  query.capacityFetcher = undefined;
+  query.capacity = total.toString();
+  const cells = await cache.findCells(JSON.stringify(query));
+  if (cells.total.lt(total)) {
+    alert("insufficient balance");
+    return;
+  }
+
+  const anyQuery = QueryBuilder.create()
+    .setLockHash(scriptToHash(toLock))
+    .setTypeCodeHash("null")
+    .setData("0x")
+    .build();
+  anyQuery.capacityFetcher = undefined;
+  const anycells = await cache.findCells(JSON.stringify(anyQuery));
+  if (anycells.cells.length == 0) {
+    alert("no any cell balance");
+    return;
+  }
+  const rawTx = {
+    version: "0x0",
+    cellDeps: [{
+      outPoint: {
+        txHash: "0x4a402097d70071ea5e95d276507dec8d8b89d0036e47cbab35a03ac1368fd66f",
+        index: "0x0"
+      },
+      depType: "code",
+    }],
+    headerDeps: [],
+    inputs: [],
+    outputs: [],
+    witnesses: [],
+    outputsData: []
+  };
+  rawTx.outputs.push({
+    capacity: `0x${new BN(toAmount).add(new BN(anycells.cells[0].capacity.slice(2), 16)).toString(16)}`,
+    lock: toLock,
+  });
+  rawTx.outputsData.push("0x");
+  rawTx.inputs.push({
+    previousOutput: {
+      txHash: anycells.cells[0].txHash,
+      index: anycells.cells[0].index,
+    },
+    since: "0x0",
+  });
+  rawTx.witnesses.push("0x");
+  for (let i = 0; i < cells.cells.length; i++) {
+    const element = cells.cells[i];
+
+    rawTx.inputs.push({
+      previousOutput: {
+        txHash: element.txHash,
+        index: element.index,
+      },
+      since: "0x0",
+    });
+    rawTx.witnesses.push("0x");
+  }
+  rawTx.witnesses[1] = {
+    lock: "",
+    inputType: "",
+    outputType: "",
+  };
+  if (cells.total.gt(total) && cells.total.sub(total).gt(new BN("6100000000"))) {
+    rawTx.outputs.push({
+      capacity: `0x${cells.total.sub(total).toString(16)}`,
+      lock: lock
+    });
+    rawTx.outputsData.push("0x");
+  }
+
+  const signObj = {
+    target: scriptToHash(lock),
+    tx: rawTx,
+    config: {index: 1, length: rawTx.witnesses.length-1}
+  }
+
+  const ws = new WebSocket('ws://localhost:50001');
+  ws.on('open', function open() {
+    ws.send(`42/keyper,["api", {"data": {"origin": "localhost", "payload":${JSON.stringify(signObj)}}, "type":"sign"}]`);
+  });
+
+  ws.on('message', function incoming(data) {
+    console.log(data);
+  });
 }
 
 async function transfer(e) {
@@ -66,6 +170,94 @@ async function transfer(e) {
     lock: toLock,
   });
   rawTx.outputsData.push("0x");
+  for (let i = 0; i < cells.cells.length; i++) {
+    const element = cells.cells[i];
+
+    rawTx.inputs.push({
+      previousOutput: {
+        txHash: element.txHash,
+        index: element.index,
+      },
+      since: "0x0",
+    });
+    rawTx.witnesses.push("0x");
+  }
+  rawTx.witnesses[0] = {
+    lock: "",
+    inputType: "",
+    outputType: "",
+  };
+  if (cells.total.gt(total) && cells.total.sub(total).gt(new BN("6100000000"))) {
+    rawTx.outputs.push({
+      capacity: `0x${cells.total.sub(total).toString(16)}`,
+      lock: lock
+    });
+    rawTx.outputsData.push("0x");
+  }
+
+  const signObj = {
+    target: scriptToHash(lock),
+    tx: rawTx,
+  }
+
+  const ws = new WebSocket('ws://localhost:50001');
+  ws.on('open', function open() {
+    ws.send(`42/keyper,["api", {"data": {"origin": "localhost", "payload":${JSON.stringify(signObj)}}, "type":"sign"}]`);
+  });
+
+  ws.on('message', function incoming(data) {
+    console.log(data);
+  });
+}
+
+async function createUDTAny(e) {
+  const toAddress = window.document.getElementById("transfer-to").value;
+  const toAmount = window.document.getElementById("transfer-amount").value;
+  if ("" === toAddress || "" === toAmount) {
+    alert("inputs empty");
+    return;
+  }
+  const total = new BN(toAmount).add(new BN("1000"));
+  const lock = addressToScript(e.getAttribute("data"));
+  const toLock = addressToScript(toAddress);
+  const query = QueryBuilder.create()
+    .setLockHash(scriptToHash(lock))
+    .setTypeCodeHash("null")
+    .setData("0x")
+    .setCapacity(total.toString())
+    .build();
+  query.capacityFetcher = undefined;
+  query.capacity = total.toString();
+  const cells = await cache.findCells(JSON.stringify(query));
+  if (cells.total.lt(total)) {
+    alert("insufficient balance");
+    return;
+  }
+  const rawTx = {
+    version: "0x0",
+    cellDeps: [{
+      outPoint: {
+        txHash: "0x78fbb1d420d242295f8668cb5cf38869adac3500f6d4ce18583ed42ff348fa64",
+        index: "0x0"
+      },
+      depType: "code",
+    }],
+    headerDeps: [],
+    inputs: [],
+    outputs: [],
+    witnesses: [],
+    outputsData: []
+  };
+  rawTx.outputs.push({
+    capacity: `0x${new BN(toAmount).toString(16)}`,
+    type: {
+      args: "0x6a242b57227484e904b4e08ba96f19a623c367dcbd18675ec6f2a71a0ff4ec26",
+      codeHash: "0x48dbf59b4c7ee1547238021b4869bceedf4eea6b43772e5d66ef8865b6ae7212",
+      hashType: "data"
+    },
+    lock: toLock,
+  });
+  rawTx.outputsData.push(`0x${new BN(0).toBuffer("le", 16).toString("hex")}`);
   for (let i = 0; i < cells.cells.length; i++) {
     const element = cells.cells[i];
 
@@ -162,7 +354,11 @@ async function init() {
     }
 
     const signObj = socketMessage.payload;
-    const tx = await wallet.signTx(signObj.target, password, signObj.tx);
+    let config = {index: 0, length: -1};
+    if (signObj.config) {
+      config = signObj.config;
+    }
+    const tx = await wallet.signTx(signObj.target, password, signObj.tx, config);
     const hash = await cache.sendTx(tx);
     HighLevelSockets.sendEvent("SEND_TX", hash, socketMessage.origin);
 
