@@ -68,10 +68,10 @@ async function transferAny(e) {
     version: "0x0",
     cellDeps: [{
       outPoint: {
-        txHash: "0x4a402097d70071ea5e95d276507dec8d8b89d0036e47cbab35a03ac1368fd66f",
+        txHash: "0xf860285b77069801f91d32a316bf07c8caee7ff1ab39b506d6708de7dd88595f",
         index: "0x0"
       },
-      depType: "code",
+      depType: "depGroup",
     }],
     headerDeps: [],
     inputs: [],
