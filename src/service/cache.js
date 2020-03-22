@@ -1,4 +1,5 @@
 const { app } = require("electron");
+const http = require("http");
 const BN = require('bn.js');
 const CKB = require("@nervosnetwork/ckb-sdk-core").default;
 const { DefaultCacheService, initConnection } = require("ckb-cache-js");
@@ -15,13 +16,11 @@ const start = async (nodeUrl = "http://localhost:8115") => {
       "node_modules/ckb-cache-js/lib/database/entity/*.js"
     ]
   });
-  ckb = new CKB(nodeUrl);
+  ckb = new CKB("");
+  const httpAgent = new http.Agent({keepAlive: true});
+  ckb.setNode({url:nodeUrl, httpAgent});
   cache = new DefaultCacheService(ckb);
   cache.start();
-};
-
-const addRule = async (rule, beginBlockNumber) => {
-  await cache.addRule(rule, beginBlockNumber);
 };
 
 const findCells = async (q) => {
@@ -48,7 +47,6 @@ const sendTx = async (tx) => {
 
 module.exports = {
   start,
-  addRule,
   findCells,
   sendTx,
 };

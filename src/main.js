@@ -58,7 +58,5 @@ global.cache = cache;
 global.HighLevelSockets = HighLevelSockets;
 
 wallet.init();
-cache.start().then(() => {
-  wallet.reloadCacheRuls();
-});
+cache.start();
 HighLevelSockets.initialize();

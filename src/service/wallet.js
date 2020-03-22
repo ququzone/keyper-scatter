@@ -69,24 +69,6 @@ const reloadKeys = () => {
   }
 };
 
-const reloadCacheRuls = async () => {
-  if (storage.keyperStorage().get("keys")) {
-    const innerKeys = storage.keyperStorage().get("keys");
-    innerKeys.forEach(key => {
-      const scripts = container.getScripsByPublicKey({
-        payload: `0x${key.publicKey}`,
-        algorithm: SignatureAlgorithm.secp256k1,
-      });
-      scripts.forEach(async (script) => {
-        await global.cache.addRule({
-          name: "LockHash",
-          data: scriptToHash(script),
-        });
-      });
-    });
-  }
-};
-
 const hashPassword = (password) => {
   const salt = storage.getSalt();
   return scrypt(password, salt, 16384, 8, 1, 16);
@@ -139,16 +121,6 @@ const generateKey = async (password) => {
     algorithm: SignatureAlgorithm.secp256k1,
   });
   keys[`0x${publicKey}`] = key;
-  const scripts = container.getScripsByPublicKey({
-    payload: `0x${publicKey}`,
-    algorithm: SignatureAlgorithm.secp256k1,
-  });
-  scripts.forEach(async (script) => {
-    await global.cache.addRule({
-      name: "LockHash",
-      data: scriptToHash(script),
-    });
-  });
 
   return publicKey;
 };
@@ -167,17 +139,6 @@ const importKey = async (privateKey, password) => {
     keys.push(ks);
     storage.keyperStorage().set("keys", keys);
   }
-
-  const scripts = container.getScripsByPublicKey({
-    payload: `0x${publicKey}`,
-    algorithm: SignatureAlgorithm.secp256k1,
-  });
-  scripts.forEach(async (script) => {
-    await global.cache.addRule({
-      name: "LockHash",
-      data: scriptToHash(script),
-    }, "1000");
-  });
   return publicKey;
 };
 
@@ -220,5 +181,4 @@ module.exports = {
   accounts,
   signTx,
   getAllLockHashesAndMeta,
-  reloadCacheRuls,
 };

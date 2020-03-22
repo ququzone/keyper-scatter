@@ -29,12 +29,12 @@ class Keccak256LockScript {
   }
 
   script(publicKey) {
-    let pubKey = new Buffer(utils.hexToBytes(publicKey));
+    let pubKey = Buffer.from(utils.hexToBytes(publicKey));
     if (pubKey.length !== 64) {
       pubKey = secp256k1.publicKeyConvert(pubKey, false).slice(1);
     }
 
-    const args = createKeccakHash("keccak256").update(new Buffer(pubKey)).digest("hex").slice(-40);
+    const args = createKeccakHash("keccak256").update(Buffer.from(pubKey)).digest("hex").slice(-40);
     return {
       codeHash: this.codeHash,
       hashType: this.hashType,
