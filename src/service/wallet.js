@@ -3,12 +3,12 @@ const EC = require("elliptic").ec;
 const { SignatureAlgorithm } = require("@keyper/specs/lib");
 const { Container } = require("@keyper/container/lib");
 const { Secp256k1LockScript } = require("@keyper/container/lib/locks/secp256k1");
-const { scriptToHash, hexToBytes } = require("@nervosnetwork/ckb-sdk-utils/lib");
+const { AnyPayLockScript } = require("@keyper/container/lib/locks/anyone-can-pay");
+const { hexToBytes } = require("@nervosnetwork/ckb-sdk-utils/lib");
 const { scriptToAddress } = require("@keyper/specs/lib/address");
 const keystore = require("@keyper/specs/lib/keystore");
 const storage = require("./storage");
 const Keccak256LockScript = require("./locks/keccak256");
-const AnyPayLockScript = require("./locks/anypay");
 
 let seed, keys, container;
 
