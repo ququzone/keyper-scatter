@@ -39,7 +39,7 @@ npm install --node_sqlite3_binary_host_mirror=http://npm.taobao.org/mirrors
 npm run start
 ```
 
-### High speed netword
+### High speed network
 
 ```
 npm install
