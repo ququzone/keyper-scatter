@@ -237,7 +237,7 @@ async function createUDTAny(e) {
     version: "0x0",
     cellDeps: [{
       outPoint: {
-        txHash: "0xa18868d6dc6bd7b1a40a515dd801709baec6f64fdf9455e3f9f4c6393b9e8477",
+        txHash: "0x0e7153f243ba4c980bfd7cd77a90568bb70fd393cb572b211a2f884de63d103d",
         index: "0x0"
       },
       depType: "code",
