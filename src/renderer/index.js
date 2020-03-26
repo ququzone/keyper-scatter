@@ -68,7 +68,7 @@ async function transferAny(e) {
     version: "0x0",
     cellDeps: [{
       outPoint: {
-        txHash: "0xf860285b77069801f91d32a316bf07c8caee7ff1ab39b506d6708de7dd88595f",
+        txHash: "0x9af66408df4703763acb10871365e4a21f2c3d3bdc06b0ae634a3ad9f18a6525",
         index: "0x0"
       },
       depType: "depGroup",
@@ -237,7 +237,7 @@ async function createUDTAny(e) {
     version: "0x0",
     cellDeps: [{
       outPoint: {
-        txHash: "0x78fbb1d420d242295f8668cb5cf38869adac3500f6d4ce18583ed42ff348fa64",
+        txHash: "0xa18868d6dc6bd7b1a40a515dd801709baec6f64fdf9455e3f9f4c6393b9e8477",
         index: "0x0"
       },
       depType: "code",

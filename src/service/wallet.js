@@ -49,9 +49,25 @@ const init = () => {
       }
     }
   }]);
-  container.addLockScript(new Secp256k1LockScript());
+  container.addLockScript(new Secp256k1LockScript(
+    "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8", "type", [{
+      outPoint: {
+        txHash: "0x6495cede8d500e4309218ae50bbcadb8f722f24cc7572dd2274f5876cb603e4e",
+        index: "0x0"
+      },
+      depType: "depGroup",
+    }]
+  ));
   container.addLockScript(new Keccak256LockScript());
-  container.addLockScript(new AnyPayLockScript());
+  container.addLockScript(new AnyPayLockScript(
+    "0x6a3982f9d018be7e7228f9e0b765f28ceff6d36e634490856d2b186acf78e79b", "type", [{
+      outPoint: {
+        txHash: "0x9af66408df4703763acb10871365e4a21f2c3d3bdc06b0ae634a3ad9f18a6525",
+        index: "0x0"
+      },
+      depType: "depGroup",
+    }]
+  ));
   keys = {};
   reloadKeys();
 };
